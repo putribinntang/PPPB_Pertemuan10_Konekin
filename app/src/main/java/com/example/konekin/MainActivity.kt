@@ -1,10 +1,12 @@
 package com.example.konekin
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.konekin.databinding.ActivityMainBinding
+import com.example.konekin.model.Data
 import com.example.konekin.model.Users
 import com.example.konekin.network.ApiClient
 import retrofit2.Call
@@ -23,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         val client = ApiClient.getInstance()
         val response = client.getAllUsers()
         val userList = ArrayList<String>()
+        val dataList = ArrayList<Data>()
 
         response.enqueue(object : Callback<Users> {
             override fun onResponse(call: Call<Users>, response: Response<Users>) {
@@ -30,6 +33,7 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful && body != null) {
                     for (i in body.data) {
                         userList.add(i.employeeName)
+                        dataList.add(i)
                     }
                     val listAdapter = ArrayAdapter(
                         this@MainActivity,
@@ -37,6 +41,12 @@ class MainActivity : AppCompatActivity() {
                         userList
                     )
                     binding.lvNama.adapter = listAdapter
+
+                    binding.lvNama.setOnItemClickListener { _, _, position, _ ->
+                        val intent = Intent(this@MainActivity, UserDetailActivity::class.java)
+                        intent.putExtra(UserDetailActivity.EXTRA_ID, dataList[position].id)
+                        startActivity(intent)
+                    }
                 } else {
                     Toast.makeText(
                         this@MainActivity,
